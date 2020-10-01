@@ -57,6 +57,20 @@ class ThirdPartyConfigurationPropertiesTests {
 				});
 	}
 
+	@Test
+	void thirdPartyConfigurationPropertiesWithCommonPrefixRegisteredWithImportAsConfigurationProperties() {
+		this.contextRunner.withUserConfiguration(ImportThirdParty1And1BisPropertiesConfiguration.class)
+				.withPropertyValues("common.name=test").run((context) -> {
+					ThirdParty1Properties properties = context.getBean(ThirdParty1Properties.class);
+					assertThat(properties.getName()).isEqualTo("test");
+					assertThat(properties.getCounter()).isEqualTo(42);
+					ThirdParty1BisProperties anotherProperties = context.getBean(ThirdParty1BisProperties.class);
+					assertThat(anotherProperties.getName()).isEqualTo("test");
+					assertThat(anotherProperties.getCounter()).isEqualTo(42);
+
+				});
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@ImportAsConfigurationPropertiesBean(ThirdParty1Properties.class)
 	static class ImportThirdParty1PropertiesConfiguration {
@@ -78,6 +92,13 @@ class ThirdPartyConfigurationPropertiesTests {
 	@Configuration(proxyBeanMethods = false)
 	@ImportAsConfigurationPropertiesBean(value = ThirdParty2Properties.class, prefix = "test.2")
 	static class ImportThirdParty2PropertiesConfiguration {
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ImportAsConfigurationPropertiesBean(value = { ThirdParty1Properties.class, ThirdParty1BisProperties.class },
+			prefix = "common")
+	static class ImportThirdParty1And1BisPropertiesConfiguration {
 
 	}
 
