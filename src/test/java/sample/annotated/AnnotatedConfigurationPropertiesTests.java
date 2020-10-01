@@ -36,7 +36,7 @@ class AnnotatedConfigurationPropertiesTests {
 	// Prefix ignored in import annotation if set in the base class?
 	@Test
 	void annotatedConfigurationPropertiesRegisteredWithImportAsConfigurationPropertiesAndSpecificPrefix() {
-		this.contextRunner.withUserConfiguration(ImportAnnotated1PropertiesConfiguration.class)
+		this.contextRunner.withUserConfiguration(ImportAnnotated1PropertiesPrefixOverrideConfiguration.class)
 				.withPropertyValues("test.1.name=test").withPropertyValues("override.1.name=override")
 				.run((context) -> {
 					Annotated1Properties properties = context.getBean(Annotated1Properties.class);
