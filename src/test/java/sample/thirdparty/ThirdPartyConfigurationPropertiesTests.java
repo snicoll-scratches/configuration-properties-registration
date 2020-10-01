@@ -13,14 +13,14 @@ class ThirdPartyConfigurationPropertiesTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 
-	// With this approach, we can't have default values (default back to 0)
+	// With this approach, default values have to be handled in code (-> no metadata)
 	@Test
 	void thirdPartyConfigurationPropertiesRegisteredWithImportAsConfigurationPropertiesAndNoPrefix() {
 		this.contextRunner.withUserConfiguration(ImportThirdParty1PropertiesConfiguration.class)
 				.withPropertyValues("name=test").run((context) -> {
 			ThirdParty1Properties properties = context.getBean(ThirdParty1Properties.class);
 			assertThat(properties.getName()).isEqualTo("test");
-			assertThat(properties.getCounter()).isEqualTo(0);
+			assertThat(properties.getCounter()).isEqualTo(42);
 		});
 	}
 
@@ -40,7 +40,18 @@ class ThirdPartyConfigurationPropertiesTests {
 				.withPropertyValues("name=noise").withPropertyValues("test.1.name=test").run((context) -> {
 			ThirdParty1Properties properties = context.getBean(ThirdParty1Properties.class);
 			assertThat(properties.getName()).isEqualTo("test");
-			assertThat(properties.getCounter()).isEqualTo(0);
+			assertThat(properties.getCounter()).isEqualTo(42);
+		});
+	}
+
+	@Test
+	void thirdPartyConfigurationPropertiesWithTwoConstructorsRegisteredWithImportAsConfigurationProperties() {
+		this.contextRunner.withUserConfiguration(ImportThirdParty2PropertiesConfiguration.class)
+				.withPropertyValues("name=test").run((context) -> {
+			assertThat(context).hasFailed();
+			assertThat(context).getFailure()
+					.hasMessageContaining("Unable process @ImportAsConfigurationPropertiesBean annotations")
+					.getCause().hasMessageContaining("Unable to deduce @ConfigurationProperties bind method");
 		});
 	}
 
@@ -58,6 +69,11 @@ class ThirdPartyConfigurationPropertiesTests {
 	@ImportAsConfigurationPropertiesBean(value = ThirdParty1Properties.class, prefix = "test.1")
 	static class ImportThirdParty1PropertiesPrefixConfiguration {
 
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ImportAsConfigurationPropertiesBean(value = ThirdParty2Properties.class, prefix = "test.2")
+	static class ImportThirdParty2PropertiesConfiguration {
 	}
 
 }
