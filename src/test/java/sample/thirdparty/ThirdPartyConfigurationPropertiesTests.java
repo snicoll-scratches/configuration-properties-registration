@@ -71,6 +71,17 @@ class ThirdPartyConfigurationPropertiesTests {
 				});
 	}
 
+	// If a constructor is present, you can't opt-out of that
+	@Test
+	void thirdPartyConfigurationPropertiesWithImportAsConfigurationPropertiesCanOptInForJavaBeanConvention() {
+		this.contextRunner.withUserConfiguration(ImportThirdParty3PropertiesConfiguration.class)
+				.withPropertyValues("test.name=test", "test.counter=20").run((context) -> {
+					ThirdParty3Properties properties = context.getBean(ThirdParty3Properties.class);
+					assertThat(properties.getName()).isEqualTo("test");
+					assertThat(properties.getCounter()).isEqualTo(42);
+				});
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@ImportAsConfigurationPropertiesBean(ThirdParty1Properties.class)
 	static class ImportThirdParty1PropertiesConfiguration {
@@ -99,6 +110,12 @@ class ThirdPartyConfigurationPropertiesTests {
 	@ImportAsConfigurationPropertiesBean(value = { ThirdParty1Properties.class, ThirdParty1BisProperties.class },
 			prefix = "common")
 	static class ImportThirdParty1And1BisPropertiesConfiguration {
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ImportAsConfigurationPropertiesBean(value = ThirdParty3Properties.class, prefix = "test")
+	static class ImportThirdParty3PropertiesConfiguration {
 
 	}
 
